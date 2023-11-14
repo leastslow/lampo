@@ -1,0 +1,28 @@
+[cache.auth]
+max_size = 1000
+time_to_live = "7d"
+
+[cache.dns]
+max_size = 1000
+resolution_timeout = "6s"
+
+[proxy]
+backlog = 128
+ports.http = 3000
+ports.socks = 3002
+
+[proxy.udp]
+stale_ttl = "5m"
+max_sockets = 2
+
+[mongodb]
+uri = "MONGODB_URI"
+database = "MONGODB_DB"
+
+[log4rs]
+location = "LOG4RS_LOC"
+
+[proxy.preload]
+tasks = 20
+addrs = []
+subnets = []

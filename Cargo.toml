@@ -1,0 +1,36 @@
+[package]
+name = "lampo"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.32.0", features = ["full"] }
+moka = { version = "0.11.3", features = ["future"] }
+serde = { version = "1.0.188", features = ["derive"] }
+humantime-serde = "1.1.1"
+config = "0.13.3"
+log = { version = "0.4.17", features = ["std", "serde"] }
+log4rs = "1.2.0"
+tokio-stream = "0.1.14"
+bytes = "1.5.0"
+httparse = "1.8.0"
+http = "0.2.9"
+socks5-proto = "0.4.0"
+ipnet = { version = "2.8.0", features = ["serde"] }
+mongodb = { version = "2.6.1", features = ["tokio-runtime"] }
+thiserror = "1.0"
+anyhow = "1.0.75"
+getopts = "0.2.21"
+url = "2.4.1"
+chrono = "0.4.31"
+rand = "0.8.5"
+base64 = "0.21.4"
+trust-dns-resolver = "0.23.2"
+
+[profile.release]
+# strip = true
+lto = true
+strip = false
+debug = "full"
