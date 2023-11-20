@@ -2,7 +2,8 @@ mod commands;
 mod handler;
 mod utils;
 
-use tokio::sync::Barrier;
+use std::mem::drop;
+use tokio::sync::{Barrier, Semaphore};
 
 use crate::{
   database::auth_manager::AuthManager,
@@ -24,6 +25,7 @@ pub struct Socks5Proxy {
   dns_resolver: DnsResolver,
   udp_config: ProxyConfigUdpSocket,
   barrier: Arc<Barrier>,
+  semaphore: Arc<Semaphore>,
 }
 
 impl Socks5Proxy {
@@ -34,6 +36,7 @@ impl Socks5Proxy {
     dns_resolver: DnsResolver,
     udp_config: ProxyConfigUdpSocket,
     barrier: Arc<Barrier>,
+    semaphore: Arc<Semaphore>,
   ) -> Self {
     Self {
       listen_addr: addr,
@@ -42,16 +45,21 @@ impl Socks5Proxy {
       dns_resolver,
       udp_config,
       barrier,
+      semaphore,
     }
   }
 
   pub async fn listen(&self) {
+    let _permit = self.semaphore.acquire().await.expect("failed to acquire semaphore permit on preload");
+
     let listener = match make_listener(self.listen_addr, self.backlog).await {
       Ok(l) => l,
       Err(e) => {
         return error!("Failed to initialize Socks5Proxy listener. Err = {:?}", e);
       }
     };
+
+    drop(_permit);
 
     let socket_state = SocketState::new(self.udp_config.max_sockets);
 

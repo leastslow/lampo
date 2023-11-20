@@ -61,8 +61,9 @@ async fn handle_preload(config: ProxyConfig, auth_manager: AuthManager, dns_reso
     let dns_resolver = dns_resolver.clone();
     let config = config.clone();
     tokio::spawn(async move {
-      let _permit = semaphore.acquire().await.expect("failed to acquire semaphore permit on preload");
-      Proxy::new(barrier, config, IpAddr::V4(addr), auth_manager, dns_resolver).listen().await;
+      Proxy::new(barrier, semaphore, config, IpAddr::V4(addr), auth_manager, dns_resolver)
+        .listen()
+        .await;
     });
   }
 
@@ -73,8 +74,9 @@ async fn handle_preload(config: ProxyConfig, auth_manager: AuthManager, dns_reso
     let dns_resolver = dns_resolver.clone();
     let config = config.clone();
     tokio::spawn(async move {
-      let _permit = semaphore.acquire().await.expect("failed to acquire semaphore permit on preload");
-      Proxy::new(barrier, config, IpAddr::V4(addr), auth_manager, dns_resolver).listen().await;
+      Proxy::new(barrier, semaphore, config, IpAddr::V4(addr), auth_manager, dns_resolver)
+        .listen()
+        .await;
     });
   }
 }

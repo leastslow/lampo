@@ -3,14 +3,13 @@ use std::{
   sync::Arc,
 };
 
-use tokio::sync::Barrier;
-
 use crate::{
   database::auth_manager::AuthManager,
   dns::DnsResolver,
   proxy::{http::HttpProxy, socks5::Socks5Proxy},
   utils::config::ProxyConfig,
 };
+use tokio::sync::{Barrier, Semaphore};
 
 mod http;
 mod socks5;
@@ -18,6 +17,7 @@ mod socks5;
 #[derive(Clone)]
 pub struct Proxy {
   barrier: Arc<Barrier>,
+  semaphore: Arc<Semaphore>,
   listen_addr: IpAddr,
   config: ProxyConfig,
   auth_manager: AuthManager,
@@ -25,9 +25,17 @@ pub struct Proxy {
 }
 
 impl Proxy {
-  pub fn new(barrier: Arc<Barrier>, config: ProxyConfig, listen_addr: IpAddr, auth_manager: AuthManager, dns_resolver: DnsResolver) -> Self {
+  pub fn new(
+    barrier: Arc<Barrier>,
+    semaphore: Arc<Semaphore>,
+    config: ProxyConfig,
+    listen_addr: IpAddr,
+    auth_manager: AuthManager,
+    dns_resolver: DnsResolver,
+  ) -> Self {
     Self {
       barrier,
+      semaphore,
       listen_addr,
       config,
       auth_manager,
@@ -41,6 +49,7 @@ impl Proxy {
       self.auth_manager.clone(),
       self.dns_resolver.clone(),
       self.barrier.clone(),
+      self.semaphore.clone(),
     );
     let socks5_proxy = Socks5Proxy::new(
       SocketAddr::from((self.listen_addr, self.config.ports.socks)),
@@ -49,6 +58,7 @@ impl Proxy {
       self.dns_resolver.clone(),
       self.config.udp.clone(),
       self.barrier.clone(),
+      self.semaphore.clone(),
     );
 
     info!(
